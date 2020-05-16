@@ -1,0 +1,94 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata: 
+  name: ing-app
+  namespace: default 
+  annotations: 
+    kubernetes.io/ingress.class: "nginx"
+    #nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    #nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    #nginx.ingress.kubernetes.io/app-root: /
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+spec: 
+  rules: 
+  - host: a.jet.com 
+    http: 
+      paths: 
+      - path: /
+        backend:  
+          serviceName: websvc 
+          servicePort: 80
+          
+---
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata:
+#  name: ing-dash
+#  namespace: default
+#  annotations:
+#    kubernetes.io/ingress.class: "nginx"
+#    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+#    nginx.ingress.kubernetes.io/rewrite-target: /$1
+#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+#    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+#    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+#spec:
+#  tls:
+#  - hosts:
+#    - a.jet.com
+#    secretName: kubernetes-dashboard-certs
+#  rules:
+#  - host: a.jet.com
+#    http:
+#      paths:
+#      - path: /a/(.*)
+#        backend:
+#          serviceName: kubernetes-dashboard
+#          servicePort: 443
+
+      #rewrite ^(/d)/$ /d/ redirect;
+      #rewrite ^/eureka/js/(.*)$ /d/eureka/js/$1 redirect;  
+      #rewrite ^/favicon.ico$ /d/favicon.ico redirect; 
+      #rewrite ^/eureka/css/(.*)$ /d/eureka/css/$1 redirect#
+      #if ($host = 'a.jet.com') { rewrite ^  http://www.baidu.com permanent;}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ing-discovery
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/app-root: /
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      #if ($host = 'a.jet.com') { rewrite ^  http://www.qq.com redirect;}
+      #rewrite (?i)/d/(.*) /$1 break;
+      #rewrite /d/(.*) http://www.baidu.com redirec
+      #rewritelog on      
+      #ok if ($request_uri ~* '^/eureka/css/.*.css') { rewrite "(!?)/eureka/css/(.*)$" https://$host:32443/d/eureka/css/$2 last; }
+      #ok if ($request_uri ~* '^/eureka/js/.*.js') { rewrite "(!?)/eureka/js/(.*)$" https://$host:32443/d/eureka/js/$2 last; }
+      #if ($request_uri ~* '^/eureka/.*') { rewrite "(!?)/(.*)$" https://$host:32443/d/$2 last; }
+      if ($request_uri ~* '^/eureka/.*\.(css|js)$') { rewrite "(!?)/(.*)$" https://$host:32443/discovery/$2 break; }
+      rewrite "(!?)/favicon.ico" https://a.jet.com:32443/d/favicon.ico last;
+      #rewrite https://a.jet.com:32443/eureka/css/wro.css https://a.jet.com:32443/d/eureka/css/wro.css redirect;
+      #rewrite ^/eureka/(.*)$" /d/eureka/$1 redirect;
+      #rewrite ^/eureka/css/(.*)$" /d/eureka/$1 redirect;
+      #if ($uri = '/eureka/css/wro.css') { rewrite /eureka/css/wro.css  /d/eureka/css/wro.css redirect; }
+      #if ($request_uri = '/eureka/css/wro.css') { rewrite ^  http://www.qq.com  redirect; }
+      #rewrite "(?i)/d(/|$)(.*)" /$2 break;
+spec:
+  rules:
+  - host: a.jet.com
+    http:
+      paths:
+      - path: /discovery(/|$)(.*)
+        backend:
+          serviceName: discovery
+          servicePort: 8761
+      - path: /eureka(/|$)(.*)
+        backend: 
+          serviceName: discovery
+          servicePort: 8761

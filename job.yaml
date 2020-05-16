@@ -1,0 +1,16 @@
+kind: Job
+apiVersion: batch/v1
+metadata: 
+  name: transient-job
+spec: 
+  parallelism: 3
+  # error completions: 6
+  template:
+    metadata: 
+      name: instant-job 
+    spec: 
+      containers: 
+      - name: short-job
+        image: busybox
+        command: ["echo","aloha job","sleep","3"] 
+      restartPolicy: OnFailure

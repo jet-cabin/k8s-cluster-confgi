@@ -1,0 +1,15 @@
+kind: CronJob
+apiVersion: batch/v2alpha1
+metadata: 
+  name: schedule-job
+spec: 
+  schedule: "*/1 * * * *"
+  jobTemplate: 
+    spec: 
+      template: 
+        spec:
+          containers: 
+          - name: cron-joob
+            image: busybox
+            command: ["echo","aloha cron job"]
+          restartPolicy: Never

@@ -1,0 +1,88 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata: 
+  name: ing-dash
+  namespace: default 
+  annotations: 
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  #  nginx.ingress.kubernetes.io/secure-backends: "true"
+  #  以上配置已经废弃，需配置下面语句，否则无法打开页面
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec: 
+  tls: 
+  - hosts: 
+    - a.jet.com
+    secretName: kubernetes-dashboard-certs
+  rules: 
+  - host: a.jet.com 
+    http: 
+      paths: 
+      - path: /a/(.*)
+        backend: 
+          serviceName: kubernetes-dashboard 
+          servicePort: 443
+
+
+---
+
+
+#apiVersion: extensions/v1beta1
+#kind: Ingress
+#metadata: 
+#  name: ing-app
+#  namespace: default 
+#  annotations: 
+#    kubernetes.io/ingress.class: "nginx"
+#    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+#    #nginx.ingress.kubernetes.io/app-root: /
+#    #nginx.ingress.kubernetes.io/rewrite-target: /
+#spec: 
+#  rules: 
+#  - host: a.jet.com 
+#    http: 
+#      paths: 
+#      - path: /
+#        backend:  
+#          serviceName: websvc 
+#          servicePort: 8999
+
+---
+ 
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata: 
+  name: ing-discovery
+  namespace: default 
+  annotations: 
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    #nginx.ingress.kubernetes.io/secure-backends: "true"
+    #nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/app-root: /
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+     # rewrite ^/(.*)$  /d/$1 last;
+     # rewrite ^/eureka/(.*)$ /d/eureka/$1 redirect; 
+     # rewrite ^/eureka/(.*)$  http://www.baidu.com redirect;
+      #rewrite ^/eureka/(.*)$ /d/eureka/$1 redirect;
+      #rewrite ^/favicon.ico /d/favicon.ico redirect;
+      #rewrite ^/eureka/css/wro.css /d/eureka/css/wro.css redirect;
+spec: 
+  rules: 
+  - host: a.jet.com 
+    http: 
+      paths: 
+      - path: /
+        backend:  
+          serviceName: websvc 
+          servicePort: 80
+      - path: /d/(.*)
+        backend:  
+          serviceName: discovery
+          servicePort: 8761

@@ -1,0 +1,33 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata: 
+  name: curl-app
+  labels: 
+    app: curl
+spec: 
+  replicas: 5
+  selector: 
+    matchLabels: 
+      app: curl
+  template: 
+    metadata: 
+      labels: 
+        app: curl
+    spec: 
+      affinity: 
+        podAntiAffinity: 
+          requiredDuringSchedulingIgnoredDuringExecution: 
+          - labelSelector: 
+               matchExpressions: 
+                 - key: app
+                   operator: In
+                   values: 
+                   - curl 
+            topologyKey: kubernetes.io/hostname
+      containers: 
+        - name: curl
+          image: radial/busyboxplus:curl
+          stdin: true
+          tty: true
+      #nodeSelector: 
+      #  t: worker1

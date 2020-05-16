@@ -1,0 +1,16 @@
+{
+  "CN": "aspire",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "BeiJing",
+      "L": "BeiJing",
+      "O": "aspire",
+      "OU": "cloudnative"
+    }
+  ]
+}
